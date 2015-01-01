@@ -69,7 +69,7 @@ class TaskWorker(threading.Thread):
 			"mv": ["mv", t.p1, t.p2],
 			"mkdir": ["mkdir", t.p2],	# mkdir path NOT RECURSIVE!
 			"get": ["get", t.p2, t.p1],	# get remote_file local_path
-			"put": ["put", t.p1, t.p2],	# put local_file remote_dir
+			"put": ["put", t.p1, t.p2, "--no-downsize"],	# put local_file remote_dir
 			"cp": ["cp", t.p1, t.p2],	# cp file folder
 			"rm": ["rm", t.p2]
 		}[t.type]
@@ -198,16 +198,16 @@ class DirScanner(threading.Thread):
 					return
 				elif local_mtime > remote_mtime:
 					print(self.getName() + ": Local file \"" + self._localPath + "/" + entry["name"] + "\" is newer.")
-					localPath_new = localPath + " (NEWER_" + str(local_mtime) + ")"
-					os.rename(localPath, localPath_new)
-					TASK_QUEUE.put(Task("get", localPath, self._remotePath + "/" + entry["name"], entry["client_updated_time"]))
-					TASK_QUEUE.put(Task("put", localPath_new, self._remotePath + " (" + str(local_mtime) + ")"))
+					# localPath_new = localPath + " (NEWER_" + str(local_mtime) + ")"
+					# os.rename(localPath, localPath_new)
+					# TASK_QUEUE.put(Task("get", localPath, self._remotePath + "/" + entry["name"], entry["client_updated_time"]))
+					TASK_QUEUE.put(Task("put", localPath, self._remotePath + " (" + str(local_mtime) + ")"))
 				else:
 					print(self.getName() + ": Local file \"" + self._localPath + "/" + entry["name"] + "\" is older.")
-					localPath_new = localPath + " (OLDER_" + str(local_mtime) + ")"
-					os.rename(localPath, localPath_new)
+					# localPath_new = localPath + " (OLDER_" + str(local_mtime) + ")"
+					# os.rename(localPath, localPath_new)
 					TASK_QUEUE.put(Task("get", localPath, self._remotePath + "/" + entry["name"], entry["client_updated_time"]))
-					TASK_QUEUE.put(Task("put", localPath_new, self._remotePath + " (" + str(local_mtime) + ")"))
+					# TASK_QUEUE.put(Task("put", localPath_new, self._remotePath + " (" + str(local_mtime) + ")"))
 			else:
 				# if not existent, get the file to local repo
 				TASK_QUEUE.put(Task("get", localPath, self._remotePath + "/" + entry["name"], entry["client_updated_time"]))
